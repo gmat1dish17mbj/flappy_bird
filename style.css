@@ -1,3 +1,18 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #0f1b2d;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+.full_container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .container {
   width: 30%;
   height: 100vh;
@@ -28,16 +43,29 @@
   transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 24px;
+  border-radius: 999px;
+  background-color: rgba(8, 13, 31, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   z-index: 2;
   text-align: center;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
 }
 
 .tittle,
 .title {
-  font-size: 36px;
-  color: #fff;
+  font-size: 40px;
+  color: #f8fafc;
   margin: 0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tittle span {
+  color: #fbd34d;
 }
 
 .bird_image {
@@ -53,13 +81,29 @@
   bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 15px 30px;
-  font-size: 24px;
-  color: #fff;
-  background-color: #28a745;
+  padding: 14px 34px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0b1726;
+  background: linear-gradient(135deg, #fbd34d, #2ec27e);
   border: none;
-  border-radius: 5px;
+  border-radius: 999px;
   cursor: pointer;
   z-index: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 18px 34px rgba(4, 20, 38, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  white-space: nowrap;
+}
+
+.start-button:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 24px 38px rgba(4, 20, 38, 0.45);
+}
+
+.start-button:active {
+  transform: translateX(-50%) translateY(1px);
+  box-shadow: 0 10px 20px rgba(4, 20, 38, 0.35);
 }
 /* ...existing code... */
