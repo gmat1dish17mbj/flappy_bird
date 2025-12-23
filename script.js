@@ -7,7 +7,9 @@ const statusTitle = document.getElementById("status-title");
 const statusSubtitle = document.getElementById("status-subtitle");
 const scoreEl = document.getElementById("score");
 const bestScoreEl = document.getElementById("best-score");
+const bird={
 
+}
 if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtitle || !scoreEl || !bestScoreEl) {
 	console.error("Flappy Bird UI elements are missing");
 } else {
@@ -25,4 +27,22 @@ if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtit
 		birdRadius: 18,
 		maxFallSpeed: 0.8
 	};
+    //Define the game_sate object n which holds the current state of the game and then BirdImage object to load the bird image
+    const gameSate={
+        x:STAGE_WIDTH*0.25,
+        y:STAGE_HEIGHT*0.5,
+        velocity:0,
+        score:0,
+        bestScore:parseInt(localStorage.getItem(BEST_SCORE_KEY))||0,
+        pipes:[],
+        lastSpawn:0,
+        isRunning:false,
+        isGameOver:false
+    };
+    const BirdImage=new Image();
+    BirdImage.src="bird.png";
+    let birdLoaded=false;
+    BirdImage.addEventListener("Load",()=>{
+        birdLoaded=true;
+    });
 }
