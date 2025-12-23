@@ -14,7 +14,27 @@
                 <p class="tittle">Flappy <span>Bird</span></p>
                 <img class="bird_image" src="images/bird.png" alt="Flappy Bird sprite">
             </div>
-            <button class="start-button">Start Game</button>
+
+            <div class="game-area" aria-live="polite">
+                <canvas id="gameCanvas" width="360" height="560" aria-label="Flappy Bird game area"></canvas>
+
+                <div class="hud">
+                    <div class="score-pill">
+                        <span>Score</span>
+                        <strong id="score">0</strong>
+                    </div>
+                    <div class="score-pill">
+                        <span>Best</span>
+                        <strong id="best-score">0</strong>
+                    </div>
+                </div>
+
+                <div class="overlay" id="overlay">
+                    <p class="status-title" id="status-title">Tap to fly</p>
+                    <p class="status-subtitle" id="status-subtitle">Press space, click, or tap to start</p>
+                    <button class="start-button" id="startButton" type="button">Start Game</button>
+                </div>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
