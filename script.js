@@ -46,3 +46,11 @@ if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtit
         birdLoaded=true;
     });
 }
+function init(){
+    updateHud();
+    showTittle();
+    showOverlay();
+    setOverlayTexts("Tap to fly","Press space,click, or tap to start")
+    state.bestScore=readBestScore();
+    attachEventListeners();
+}
