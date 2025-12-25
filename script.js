@@ -54,3 +54,19 @@ function init(){
     state.bestScore=readBestScore();
     attachEventListeners();
 }
+function attachEventListeners(){
+    startButton.addEventListener("click",handleControl);
+    canvas.addEventListener("pointerdown",handleControl)
+    window.addEventListener("keydown",(e)=>{
+        if(e.code==="Space"){
+            return
+        }
+        e.preventDefault();
+        handleControl(e);
+    });
+    window.addEventListener("keyup",(e)=>{
+        if(document.hidden && state.mode==="running"){
+            endGame();
+        }
+    });
+}
