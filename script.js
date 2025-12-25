@@ -36,12 +36,19 @@ if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtit
 		best: 0,
 		lastSpawn: 0
 	};
-
-	const birdSprite = new Image();
+    
+    const birdSprite = new Image();
 	let birdReady = false;
 	birdSprite.src = "images/bird.png";
 	birdSprite.addEventListener("load", () => {
 		birdReady = true;
+	});
+
+    const bgSprite = new Image();
+	let bgReady = false;
+	bgSprite.src = "images/bg.png";
+	bgSprite.addEventListener("load", () => {
+		bgReady = true;
 	});
 
 	let animationFrame = null;
@@ -102,4 +109,5 @@ if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtit
         state.lastSpawn=0;
         updateHud();
     }
+    
 }
