@@ -1,4 +1,3 @@
-//initialization for the flabby bird gothrough
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas?.getContext("2d");
 const startButton = document.getElementById("startButton");
@@ -7,17 +6,16 @@ const statusTitle = document.getElementById("status-title");
 const statusSubtitle = document.getElementById("status-subtitle");
 const scoreEl = document.getElementById("score");
 const bestScoreEl = document.getElementById("best-score");
-const bird={
+const titleWrapper = document.querySelector(".title-wrapper");
 
-}
-if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtitle || !scoreEl || !bestScoreEl) {
+if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtitle || !scoreEl || !bestScoreEl || !titleWrapper) {
 	console.error("Flappy Bird UI elements are missing");
 } else {
 	const STAGE_WIDTH = canvas.width;
 	const STAGE_HEIGHT = canvas.height;
 	const BEST_SCORE_KEY = "flappy_bird_best";
 
-	const variables = {
+	const config = {
 		gravity: 0.0019,
 		jumpForce: -0.56,
 		pipeGap: 150,
@@ -27,46 +25,81 @@ if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtit
 		birdRadius: 18,
 		maxFallSpeed: 0.8
 	};
-    //Define the game_sate object n which holds the current state of the game and then BirdImage object to load the bird image
-    const gameSate={
-        x:STAGE_WIDTH*0.25,
-        y:STAGE_HEIGHT*0.5,
-        velocity:0,
-        score:0,
-        bestScore:parseInt(localStorage.getItem(BEST_SCORE_KEY))||0,
-        pipes:[],
-        lastSpawn:0,
-        isRunning:false,
-        isGameOver:false
-    };
-    const BirdImage=new Image();
-    BirdImage.src="bird.png";
-    let birdLoaded=false;
-    BirdImage.addEventListener("Load",()=>{
-        birdLoaded=true;
-    });
-}
-function init(){
-    updateHud();
-    showTittle();
-    showOverlay();
-    setOverlayTexts("Tap to fly","Press space,click, or tap to start")
-    state.bestScore=readBestScore();
-    attachEventListeners();
-}
-function attachEventListeners(){
-    startButton.addEventListener("click",handleControl);
-    canvas.addEventListener("pointerdown",handleControl)
-    window.addEventListener("keydown",(e)=>{
-        if(e.code==="Space"){
-            return
+
+	const state = {
+		mode: "idle",
+		birdX: STAGE_WIDTH * 0.25,
+		birdY: STAGE_HEIGHT * 0.5,
+		velocity: 0,
+		pipes: [],
+		score: 0,
+		best: 0,
+		lastSpawn: 0
+	};
+
+	const birdSprite = new Image();
+	let birdReady = false;
+	birdSprite.src = "images/bird.png";
+	birdSprite.addEventListener("load", () => {
+		birdReady = true;
+	});
+
+	let animationFrame = null;
+	let lastTimestamp = 0;
+
+	init();
+
+	function init() {
+		state.best = readBestScore();
+		updateHud();
+		setOverlayTexts("Tap to fly", "Press space, click, or tap to start");
+		showTitle();
+		showOverlay();
+		attachEventListeners();
+	}
+
+	function attachEventListeners() {
+		startButton.addEventListener("click", handleControl);
+		canvas.addEventListener("pointerdown", handleControl);
+		window.addEventListener("keydown", (event) => {
+			if (event.code !== "Space") {
+				return;
+			}
+			event.preventDefault();
+			handleControl(event);
+		});
+
+		window.addEventListener("visibilitychange", () => {
+			if (document.hidden && state.mode === "running") {
+				endGame();
+			}
+		});
+	}
+    function handleControl(e){
+        e?.preventDefault();
+        if(state.mode!=="running"){
+            startGame();
         }
-        e.preventDefault();
-        handleControl(e);
-    });
-    window.addEventListener("keyup",(e)=>{
-        if(document.hidden && state.mode==="running"){
-            endGame();
+        state.velocity=config.jumpForce;
+    }
+    function startGame(){
+        state.mode="running";
+        resetGame();
+        hideTitle();
+        hideOverlay();
+        lastTimestamp=0;
+        if (animationFrame){
+            cancelAnimationFrame(animationFrame);
         }
-    });
+        animationFrame=requestAnimationFrame(gameLoop);
+    }
+    function resetGame(){
+        state.birdY=STAGE_HEIGHT*0.5;
+        state.birdX=STAGE_WIDTH*0.25;
+        state.velocity=0;
+        state.pipes=[];
+        state.score=0;
+        state.lastSpawn=0;
+        updateHud();
+    }
 }
