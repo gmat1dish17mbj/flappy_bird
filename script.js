@@ -37,6 +37,13 @@ if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtit
 		lastSpawn: 0
 	};
 
+	const backgroundSprite = new Image();
+	let backgroundReady = false;
+	backgroundSprite.src = "images/bg.png";
+	backgroundSprite.addEventListener("load", () => {
+		backgroundReady = true;
+	});
+
 	const birdSprite = new Image();
 	let birdReady = false;
 	birdSprite.src = "images/bird.png";
@@ -75,35 +82,36 @@ if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtit
 			}
 		});
 	}
-    function handleControl(e){
-        e?.preventDefault();
-        if(state.mode!=="running"){
-            startGame();
-        }
-        state.velocity=config.jumpForce;
-    }
-    function startGame(){
-        state.mode="running";
-        resetGame();
-        hideTitle();
-        hideOverlay();
-        lastTimestamp=0;
-        if (animationFrame){
-            cancelAnimationFrame(animationFrame);
-        }
-        animationFrame=requestAnimationFrame(gameLoop);
-    }
-    function resetGame(){
-        state.birdY=STAGE_HEIGHT*0.5;
-        state.birdX=STAGE_WIDTH*0.25;
-        state.velocity=0;
-        state.pipes=[];
-        state.score=0;
-        state.lastSpawn=0;
-        updateHud();
-    }
 
+	function handleControl(event) {
+		event?.preventDefault();
+		if (state.mode !== "running") {
+			startGame();
+		}
+		state.velocity = config.jumpForce;
+	}
 
+	function startGame() {
+		resetGame();
+		state.mode = "running";
+		hideTitle();
+		hideOverlay();
+		lastTimestamp = 0;
+		if (animationFrame) {
+			cancelAnimationFrame(animationFrame);
+		}
+		animationFrame = requestAnimationFrame(gameLoop);
+	}
+
+	function resetGame() {
+		state.birdX = STAGE_WIDTH * 0.25;
+		state.birdY = STAGE_HEIGHT * 0.5;
+		state.velocity = 0;
+		state.pipes = [];
+		state.score = 0;
+		state.lastSpawn = 0;
+		updateHud();
+	}
 
 	function gameLoop(timestamp) {
 		if (!lastTimestamp) {
@@ -153,7 +161,6 @@ if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtit
 			passed: false
 		});
 	}
-
 	function detectCollisions() {
 		if (state.birdY - config.birdRadius <= 0 || state.birdY + config.birdRadius >= STAGE_HEIGHT) {
 			endGame();
@@ -197,5 +204,103 @@ if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtit
 		showOverlay();
 	}
 
-	
+	function drawGame() {
+		ctx.clearRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
+		drawBackdrop();
+		drawPipes();
+		drawBird();
+	}
+
+	function drawBackdrop() {
+		if (backgroundReady) {
+			ctx.drawImage(backgroundSprite, 0, 0, STAGE_WIDTH, STAGE_HEIGHT);
+			return;
+		}
+
+		const gradient = ctx.createLinearGradient(0, 0, 0, STAGE_HEIGHT);
+		gradient.addColorStop(0, "#8ddaff");
+		gradient.addColorStop(0.5, "#53b8ff");
+		gradient.addColorStop(1, "#2c8c62");
+		ctx.fillStyle = gradient;
+		ctx.fillRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
+	}
+
+	function drawPipes() {
+		ctx.fillStyle = "#1e8e3e";
+		ctx.strokeStyle = "rgba(0, 0, 0, 0.25)";
+		ctx.lineWidth = 4;
+
+		state.pipes.forEach((pipe) => {
+			ctx.fillRect(pipe.x, 0, config.pipeWidth, pipe.gapTop);
+			ctx.strokeRect(pipe.x, 0, config.pipeWidth, pipe.gapTop);
+
+			const bottomHeight = STAGE_HEIGHT - (pipe.gapTop + config.pipeGap);
+			ctx.fillRect(pipe.x, pipe.gapTop + config.pipeGap, config.pipeWidth, bottomHeight);
+			ctx.strokeRect(pipe.x, pipe.gapTop + config.pipeGap, config.pipeWidth, bottomHeight);
+		});
+	}
+
+	function drawBird() {
+		if (!birdReady) {
+			return;
+		}
+
+		const angle = Math.max(-0.6, Math.min(0.5, state.velocity * 1.2));
+		const size = config.birdRadius * 2;
+		ctx.save();
+		ctx.translate(state.birdX, state.birdY);
+		ctx.rotate(angle);
+		ctx.drawImage(birdSprite, -size / 2, -size / 2, size, size);
+		ctx.restore();
+	}
+
+	function updateHud() {
+		scoreEl.textContent = state.score;
+		bestScoreEl.textContent = state.best;
+	}
+
+	function setOverlayTexts(title, subtitle) {
+		statusTitle.textContent = title;
+		statusSubtitle.textContent = subtitle;
+	}
+
+	function showOverlay() {
+		overlay.classList.remove("hidden");
+	}
+
+	function hideOverlay() {
+		overlay.classList.add("hidden");
+	}
+
+	function showTitle() {
+		titleWrapper.style.opacity = "1";
+		titleWrapper.style.pointerEvents = "auto";
+	}
+
+	function hideTitle() {
+		titleWrapper.style.opacity = "0";
+		titleWrapper.style.pointerEvents = "none";
+	}
+
+	function readBestScore() {
+		try {
+			const cached = localStorage.getItem(BEST_SCORE_KEY);
+			return cached ? Number(cached) || 0 : 0;
+		} catch (error) {
+			console.warn("Could not read stored score", error);
+			return 0;
+		}
+	}
+
+	function persistBestScore() {
+		if (state.score > state.best) {
+			state.best = state.score;
+		}
+		updateHud();
+		try {
+			localStorage.setItem(BEST_SCORE_KEY, String(state.best));
+		} catch (error) {
+			console.warn("Could not store score", error);
+		}
+	}
 }
