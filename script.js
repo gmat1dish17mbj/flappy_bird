@@ -102,4 +102,100 @@ if (!canvas || !ctx || !startButton || !overlay || !statusTitle || !statusSubtit
         state.lastSpawn=0;
         updateHud();
     }
+
+
+
+	function gameLoop(timestamp) {
+		if (!lastTimestamp) {
+			lastTimestamp = timestamp;
+		}
+		const delta = timestamp - lastTimestamp;
+		lastTimestamp = timestamp;
+
+		updateGame(delta, timestamp);
+		drawGame();
+
+		if (state.mode === "running") {
+			animationFrame = requestAnimationFrame(gameLoop);
+		}
+	}
+
+	function updateGame(delta, timestamp) {
+		state.velocity += config.gravity * delta;
+		state.velocity = Math.min(state.velocity, config.maxFallSpeed);
+		state.birdY += state.velocity * delta;
+
+		if (timestamp - state.lastSpawn > config.pipeFrequency) {
+			spawnPipe();
+			state.lastSpawn = timestamp;
+		}
+
+		state.pipes.forEach((pipe) => {
+			pipe.x -= config.pipeSpeed * delta;
+			if (!pipe.passed && pipe.x + config.pipeWidth < state.birdX - config.birdRadius) {
+				pipe.passed = true;
+				state.score += 1;
+				updateHud();
+			}
+		});
+
+		state.pipes = state.pipes.filter((pipe) => pipe.x + config.pipeWidth > -20);
+
+		detectCollisions();
+	}
+
+	function spawnPipe() {
+		const margin = 70;
+		const gapTop = margin + Math.random() * (STAGE_HEIGHT - 2 * margin - config.pipeGap);
+		state.pipes.push({
+			x: STAGE_WIDTH + config.pipeWidth,
+			gapTop,
+			passed: false
+		});
+	}
+
+	function detectCollisions() {
+		if (state.birdY - config.birdRadius <= 0 || state.birdY + config.birdRadius >= STAGE_HEIGHT) {
+			endGame();
+			return;
+		}
+
+		for (const pipe of state.pipes) {
+			const horizontalHit =
+				state.birdX + config.birdRadius > pipe.x &&
+				state.birdX - config.birdRadius < pipe.x + config.pipeWidth;
+
+			if (!horizontalHit) {
+				continue;
+			}
+
+			const hitsTop = state.birdY - config.birdRadius < pipe.gapTop;
+			const hitsBottom = state.birdY + config.birdRadius > pipe.gapTop + config.pipeGap;
+
+			if (hitsTop || hitsBottom) {
+				endGame();
+				return;
+			}
+		}
+	}
+
+	function endGame() {
+		if (state.mode === "over") {
+			return;
+		}
+
+		state.mode = "over";
+		if (animationFrame) {
+			cancelAnimationFrame(animationFrame);
+			animationFrame = null;
+		}
+
+		persistBestScore();
+		setOverlayTexts("Game over", `Score ${state.score} · Best ${state.best}`);
+		startButton.textContent = "Play again";
+		showTitle();
+		showOverlay();
+	}
+
+	
 }
