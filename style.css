@@ -167,6 +167,7 @@ canvas {
   gap: 12px;
   padding: 20px;
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   transition: opacity 0.18s ease;
 }
 
